@@ -110,3 +110,45 @@ class CreateMaterialSerializer(serializers.ModelSerializer):
             material_image.image.save(image_name, image_file)
 
         return material
+    
+
+
+class LoginSerializer(serializers.Serializer):
+
+    email = serializers.EmailField()
+    password = serializers.CharField()
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        exclude = ('is_staff', 'is_active', 'password', 'is_superuser', 'groups', 'user_permissions')
+
+
+class RegisterSerializer(serializers.ModelSerializer):
+    avatar = Base64ImageField()  # Используем Base64ImageField вместо ListSerializer
+    password1 = serializers.CharField(validators=[validate_password])
+    password2 = serializers.CharField()
+
+    class Meta:
+        model = User
+        exclude = ('is_staff', 'is_active', 'password', 'is_superuser', 'groups', 'user_permissions',)
+
+    def validate(self, attrs):
+        password1 = attrs.get('password1')
+        password2 = attrs.get('password2')
+        
+        if password1 != password2:
+            raise serializers.ValidationError({
+                'password2': ['Пароли не совпадают!']
+            })
+
+        return attrs
+
+    def create(self, validated_data):
+        password = validated_data.pop('password1')
+        validated_data.pop('password2')
+        validated_data['password'] = make_password(password)
+
+        return super().create(validated_data)

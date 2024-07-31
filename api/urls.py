@@ -12,5 +12,12 @@ router.register('companies', CompaniesViewSet)
 
 
 urlpatterns = [
+     path('user/<int:id>', UserViewSet.as_view()),
+
+    path('auth/login/', LoginApiView.as_view()),
+    path('auth/register/', RegisterApiView.as_view()),
+    
+    path('redactor_profile/<int:id>/', RedactorProfileApiView.as_view()),
+
     path('', include(router.urls)),
 ]
